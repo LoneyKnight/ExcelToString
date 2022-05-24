@@ -42,7 +42,7 @@ def saveLua(data, outputDir):
     json_text = json.dumps(data, indent=4, ensure_ascii=False)
     lua_text = ToLua.str_to_lua_table(json_text)
     # 保存lua文件
-    with open(r'%s/string.lua' % outputDir, 'w', encoding='UTF-8') as fileobject:
+    with open(r'%s/stringConfig.lua' % outputDir, 'w', encoding='UTF-8') as fileobject:
         fileobject.write(lua_text)
     print("------写入string.lua完毕------")
 
