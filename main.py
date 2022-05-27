@@ -65,6 +65,8 @@ def ParseString(string):
     for i in range(len(result)):
         if "name" in result[i]:
             string = string.replace("{%s}" % result[i], "<color=#a75c16>{%s}</color>" % result[i])
+        # if "params" in result[i]:
+        #     string = string.replace("{%s}" % result[i], "<color=#359e28>{%s}</color>" % result[i])
     return string
 
 
