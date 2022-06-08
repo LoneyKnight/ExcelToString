@@ -1,18 +1,25 @@
 import sys
-import os, re, ToLua
+import os
+import re
+import ToLua
 import xlrd
 import json
 import time
+import csv
 
 
 def LoadFiles(files):
     root = {}
     for file in files:
         print("------开始读取%s------" % file)
-        data = xlrd.open_workbook(file)
+        # if file == 'string.csv':
+        #     root = load_csv(file, root)
+        # else:
+        #     continue
+        info = xlrd.open_workbook(file)
         # table = data.sheet_by_name('main@')
         # 读取每个sheet
-        data_sheet = data.sheets()
+        data_sheet = info.sheets()
         for table in data_sheet:
             if table.name[-1] == '#':
                 continue
@@ -22,34 +29,44 @@ def LoadFiles(files):
                     idCol = i - 1
                     cnCol = i
                     enCol = i + 1
-                for i in range(3, table.nrows):
+                for j in range(3, table.nrows):
                     if cnCol > 0:
-                        if table.cell_value(i, cnCol) == '':
+                        if table.cell_value(j, cnCol) == '':
                             continue
-                        text = ParseString(str(table.cell_value(i, cnCol)))
-                        root[table.cell_value(i, idCol)] = {'cn': text}
-
+                        text = ParseString(str(table.cell_value(j, cnCol)))
+                        root[table.cell_value(j, idCol)] = {'cn': text}
     return root
 
 
-def ToJson(data, outputDir):
-    with open(r'%s/string.json' % outputDir, 'w', encoding='UTF-8') as fileobject:
-        fileobject.write(json.dumps(data, indent=4, ensure_ascii=False))
+def load_csv(file, root):
+    with open(file, encoding='utf-8-sig', mode='r') as f:
+        # 读取string.csv
+        csv_info = csv.DictReader(f)
+        for row in csv_info:
+            root[str(row['id'])] = row['cn']
+            print(f"{row['id']}:{row['cn']}")
+        return root
+
+
+def ToJson(info, output_dir):
+    with open(r'%s/string.json' % output_dir, 'w', encoding='UTF-8') as fileobject:
+        fileobject.write(json.dumps(info, indent=4, ensure_ascii=False))
     print("------写入string.json完毕------")
 
+
 # 将字符串转换为lua格式
-def saveLua(data, outputDir):
-    json_text = json.dumps(data, indent=4, ensure_ascii=False)
+def saveLua(info, output_dir):
+    json_text = json.dumps(info, indent=4, ensure_ascii=False)
     lua_text = ToLua.str_to_lua_table(json_text)
     # 保存lua文件
-    with open(r'%s/stringConfig.lua' % outputDir, 'w', encoding='UTF-8') as fileobject:
+    with open(r'%s/stringConfig.lua' % output_dir, 'w', encoding='UTF-8') as fileobject:
         fileobject.write(lua_text)
     print("------写入string.lua完毕------")
 
 
-def ToTxt(data, outputDir):
-    with open(r'%s/string.txt' % outputDir, 'w', encoding='UTF-8') as fileobject:
-        for key, value in data.items():
+def ToTxt(info, output_dir):
+    with open(r'%s/string.txt' % output_dir, 'w', encoding='UTF-8') as fileobject:
+        for key, value in info.items():
             fileobject.write("%s,%s\n" % (key, value['cn']))
 
 
@@ -77,6 +94,7 @@ if __name__ == '__main__':
     try:
         data = LoadFiles(files)
         # ToJson(data, outputDir)
+        data = load_csv('string.csv', data)
         saveLua(data, outputDir)
         if 'isOutputTxt' in config and config['isOutputTxt'] == 1:
             ToTxt(data, os.getcwd())
