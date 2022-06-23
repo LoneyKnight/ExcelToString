@@ -43,8 +43,7 @@ def load_csv(file, root):
         # 读取string.csv
         csv_info = csv.DictReader(f)
         for row in csv_info:
-            root[str(row['id'])] = row['cn']
-            print(f"{row['id']}:{row['cn']}")
+            root[str(row['id'])] = {'cn': row['cn']}
         return root
 
 
@@ -82,8 +81,10 @@ def ParseString(string):
     for i in range(len(result)):
         if "name" in result[i]:
             string = string.replace("{%s}" % result[i], "<color=#a75c16>{%s}</color>" % result[i])
-        # if "params" in result[i]:
-        #     string = string.replace("{%s}" % result[i], "<color=#359e28>{%s}</color>" % result[i])
+    # 如果匹配到<ts>，则进行替换
+    if "<ts>" in string:
+        string = string.replace("<ts>", "<color=#a75c16>")
+        string = string.replace("</ts>", "</color>")
     return string
 
 
