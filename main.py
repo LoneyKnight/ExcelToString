@@ -34,6 +34,9 @@ def LoadFiles(files):
                         if table.cell_value(j, cnCol) == '':
                             continue
                         text = ParseString(str(table.cell_value(j, cnCol)))
+                        # 将text中的<ts>和</ts>替换为<color=#a75c16>和</color>
+                        text = text.replace("<ts>", "<color=#a75c16>")
+                        text = text.replace("</ts>", "</color>")
                         root[table.cell_value(j, idCol)] = {'cn': text}
     return root
 
@@ -81,10 +84,6 @@ def ParseString(string):
     for i in range(len(result)):
         if "name" in result[i]:
             string = string.replace("{%s}" % result[i], "<color=#a75c16>{%s}</color>" % result[i])
-    # 如果匹配到<ts>，则进行替换
-    if "<ts>" in string:
-        string = string.replace("<ts>", "<color=#a75c16>")
-        string = string.replace("</ts>", "</color>")
     return string
 
 
